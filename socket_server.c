@@ -517,7 +517,7 @@ static socklen_t udp_socket_address(struct socket *s, const uint8_t udp_address[
 		return 0;
 
 	memcpy(&port, udp_address+1, sizeof(uint16_t));
-	switch (s->protocol){
+	switch(s->protocol){
 	case PROTOCOL_UDP:
 		memset(&sa->v4, 0, sizeof(sa->v4));
 		sa->s.sa_family = AF_INET;
@@ -947,7 +947,7 @@ static int ctrl_cmd(struct socket_server *ss, struct socket_message *result){
 	len = header[1];
 	block_readpipe(fd, buffer, len);
 	// ctrl command only exist in local fd, so don't worry about endian.
-	switch (type){
+	switch(type){
 	case 'S':
 		return start_socket(ss,(struct request_start *)buffer, result);
 	case 'B':
@@ -1221,7 +1221,7 @@ int socket_server_poll(struct socket_server *ss, struct socket_message * result,
 			// dispatch pipe message at beginning
 			continue;
 		}
-		switch (s->type){
+		switch(s->type){
 		case SOCKET_TYPE_CONNECTING:
 			return report_connect(ss, s, result);
 		case SOCKET_TYPE_LISTEN:
@@ -1525,7 +1525,7 @@ int64_t socket_server_udp_send(struct socket_server *ss, int id, const struct so
 	request.u.send_udp.send.sz = sz;
 	request.u.send_udp.send.buffer = (char *)buffer;
 
-	switch (udp_address[0]){
+	switch(udp_address[0]){
 	case PROTOCOL_UDP:
 		addrsz = 1+2+4;		// 1 type, 2 port, 4 ipv4
 		break;
