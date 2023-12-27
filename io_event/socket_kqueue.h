@@ -73,7 +73,7 @@ static int ev_wait(int kfd, struct event *e, int max){
 
 static void ev_nonblocking(int fd){
 	int flag = fcntl(fd, F_GETFL, 0);
-	if( -1 == flag ){
+	if(-1 == flag){
 		return;
 	}
 

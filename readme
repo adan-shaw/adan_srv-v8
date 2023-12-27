@@ -1,0 +1,6 @@
+adan_srv-v8:
+	* git clone from https://github.com/cloudwu/skynet.git
+	* it's a simple udp server written by language c
+	* optimized a little big
+	* supported freebsd/linux
+	* supported ptmalloc to jemalloc
