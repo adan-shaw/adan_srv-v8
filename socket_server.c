@@ -217,10 +217,10 @@ struct send_object {
 #	define FREE 	free
 #endif
 
-const char * _binding = "binding";
-const char * _start = "start";
-const char * _transfer = "transfer";
-const char * _host = "0.0.0.0";
+const char * str_binding = "binding";
+const char * str_start = "start";
+const char * str_transfer = "transfer";
+const char * str_host = "0.0.0.0";
 
 static inline bool send_object_init(struct socket_server *ss, struct send_object *so, void *object, int sz){
 	if(sz < 0){
@@ -818,7 +818,7 @@ static int bind_socket(struct socket_server *ss, struct request_bind *request, s
 	}
 	ev_nonblocking(request->fd);
 	s->type = SOCKET_TYPE_BIND;
-	result->data = _binding;
+	result->data = str_binding;
 	return SOCKET_OPEN;
 }
 
@@ -840,12 +840,12 @@ static int start_socket(struct socket_server *ss, struct request_start *request,
 		}
 		s->type = (s->type == SOCKET_TYPE_PACCEPT) ? SOCKET_TYPE_CONNECTED : SOCKET_TYPE_LISTEN;
 		s->opaque = request->opaque;
-		result->data = _start;
+		result->data = str_start;
 		return SOCKET_OPEN;
 	}
 	else if(s->type == SOCKET_TYPE_CONNECTED){
 		s->opaque = request->opaque;
-		result->data = _transfer;
+		result->data = str_transfer;
 		return SOCKET_OPEN;
 	}
 	return -1;
@@ -1234,7 +1234,6 @@ int socket_server_poll(struct socket_server *ss, struct socket_message * result,
 			break;
 		default:
 			if(e->read){
-				type;
 				if(s->protocol == PROTOCOL_TCP){
 					type = forward_message_tcp(ss, s, result);
 				}
@@ -1372,7 +1371,7 @@ static int do_bind(const char *host, int port, int protocol, int *family){
 	struct addrinfo *ai_list = NULL;
 	char portstr[16];
 	if(host == NULL || host[0] == 0){
-		host = _host;	// INADDR_ANY
+		host = str_host;	// INADDR_ANY
 	}
 	sprintf(portstr, "%d", port);
 	memset(&ai_hints, 0, sizeof(ai_hints));

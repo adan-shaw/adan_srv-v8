@@ -9,8 +9,9 @@
 static void *_poll(void * ud){
 	struct socket_server *ss = ud;
 	struct socket_message result;
+	int type;
 	for(;;){
-		int type = socket_server_poll(ss, &result, NULL);
+		type = socket_server_poll(ss, &result, NULL);
 		// DO NOT use any ctrl command (socket_server_close , etc.) in this thread.
 		switch (type){
 		case SOCKET_EXIT:
@@ -37,16 +38,17 @@ static void *_poll(void * ud){
 
 static void test(struct socket_server *ss){
 	pthread_t pid;
+	int c,l,b,i;
 	pthread_create(&pid, NULL, _poll, ss);
 
-	int c = socket_server_connect(ss,100,"127.0.0.1",80);
+	c = socket_server_connect(ss,100,"127.0.0.1",80);
 	printf("connecting %d\n",c);
-	int l = socket_server_listen(ss,200,"127.0.0.1",8888,32);
+	l = socket_server_listen(ss,200,"127.0.0.1",8888,32);
 	printf("listening %d\n",l);
 	socket_server_start(ss,201,l);
-	int b = socket_server_bind(ss,300,1);
+	b = socket_server_bind(ss,300,1);
 	printf("binding stdin %d\n",b);
-	int i;
+	i;
 	for(i=0;i<100;i++){
 		socket_server_connect(ss, 400+i, "127.0.0.1", 8888);
 	}
@@ -58,10 +60,11 @@ static void test(struct socket_server *ss){
 
 int main(){
 	struct sigaction sa;
+	struct socket_server * ss;
 	sa.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sa, 0);
 
-	struct socket_server * ss = socket_server_create();
+	ss = socket_server_create();
 	test(ss);
 	socket_server_release(ss);
 
