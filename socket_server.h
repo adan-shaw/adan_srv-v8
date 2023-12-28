@@ -1,37 +1,17 @@
 #ifndef adan_socket_server_h
 #define adan_socket_server_h
 
-#include <stdint.h>
+#include "socket_serverEx.h"
 
-// custom malloc/free
-//#define SOCKET_SERVER_FILE_MEMAPI   adan.h
-//#define SOCKET_SERVER_MALLOC        adan_malloc
-//#define SOCKET_SERVER_FREE          adan_free
 
-#define SOCKET_DATA (0)
-#define SOCKET_CLOSE (1)
-#define SOCKET_OPEN (2)
-#define SOCKET_ACCEPT (3)
-#define SOCKET_ERROR (4)
-#define SOCKET_EXIT (5)
-#define SOCKET_UDP (6)
 
-struct socket_server;
+struct socket_server * socket_server_create();//创建socket_server
+void socket_server_release(struct socket_server *);//释放socket_server
+int socket_server_poll(struct socket_server *, struct socket_message *result, int *more);//接收所有io 时间, 包括accept, 数据io
 
-struct socket_message {
-	int id;
-	uintptr_t opaque;
-	int ud;	// for accept, ud is listen id ; for data, ud is size of data
-	char * data;
-};
-
-struct socket_server * socket_server_create();
-void socket_server_release(struct socket_server *);
-int socket_server_poll(struct socket_server *, struct socket_message *result, int *more);
-
-void socket_server_exit(struct socket_server *);
+void socket_server_exit(struct socket_server *);//停止socket_server
 void socket_server_close(struct socket_server *, uintptr_t opaque, int id);
-void socket_server_start(struct socket_server *, uintptr_t opaque, int id);
+void socket_server_start(struct socket_server *, uintptr_t opaque, int id);//开始socket_server
 
 // return -1 when error
 int64_t socket_server_send(struct socket_server *, int id, const void * buffer, int sz);
@@ -58,13 +38,9 @@ int64_t socket_server_udp_send(struct socket_server *, int id, const struct sock
 // extract the address of the message, struct socket_message * should be SOCKET_UDP
 const struct socket_udp_address * socket_server_udp_address(struct socket_server *, struct socket_message *, int *addrsz);
 
-struct socket_object_interface {
-	void * (*buffer)(void *);
-	int (*size)(void *);
-	void (*free)(void *);
-};
-
 // if you send package sz == -1, use soi.
 void socket_server_userobject(struct socket_server *, struct socket_object_interface *soi);
+
+
 
 #endif

@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <signal.h>
 
@@ -17,7 +18,7 @@ static void *_poll(void * ud){
 		case SOCKET_EXIT:
 			return NULL;
 		case SOCKET_DATA:
-			printf("message(%lu) [id=%d] size=%d\n",result.opaque,result.id, result.ud);
+			printf("message(%lu) [id=%d] size=%d, data: %s\n",result.opaque,result.id, result.ud, result.data);
 			free(result.data);
 			break;
 		case SOCKET_CLOSE:
@@ -36,28 +37,42 @@ static void *_poll(void * ud){
 	}
 }
 
+const char* str_data = "hello adan_srv-v8";
+#define test_count (128)
+
 static void test(struct socket_server *ss){
 	pthread_t pid;
 	int c,l,b,i;
-	pthread_create(&pid, NULL, _poll, ss);								//创建新线程for srv io_event (仅只处理io事件, 为做任何收发io 操作)
+	void * pdata;
+	int id_pool[test_count];
+	pthread_create(&pid, NULL, _poll, ss);											//创建新线程for srv io_event (仅只处理io事件, 为做任何收发io 操作)
 
-	c = socket_server_connect(ss,100,"127.0.0.1",80);			//connect 非阻塞test
+	c = socket_server_connect(ss,100,"127.0.0.1",80);						//connect 非阻塞test
 	printf("connecting %d\n",c);
 
-	l = socket_server_listen(ss,200,"127.0.0.1",8888,32);	//监听
+	l = socket_server_listen(ss,200,"127.0.0.1",8888,32);				//监听
 	printf("listening %d\n",l);
 
-	socket_server_start(ss,201,l);												//启动srv
+	socket_server_start(ss,201,l);															//启动srv
 
-	b = socket_server_bind(ss,300,1);											//bind 标准输入stdin 到ss(绑定前, accept from 1; 绑定后, accept from 2; 这个操作跟pipe 管道有关?)
+	b = socket_server_bind(ss,300,1);														//bind 标准输入stdin 到ss(绑定前, accept from 1; 绑定后, accept from 2; 这个操作跟pipe 管道有关?)
 	printf("binding stdin %d\n",b);
 
-	for(i=0;i<100;i++){
-		socket_server_connect(ss, 400+i, "127.0.0.1", 8888);
+	for(i=0;i<test_count;i++){
+		id_pool[i] = socket_server_connect(ss, 400+i, "127.0.0.1", 8888);	//成功返回id, id 不等于sfd, 但可以在管理pool 中找到结构体
+		printf("socket_server_connect(): return value = %d, second_parameter = %d\n", id_pool[i], 400+i);//for test only
 	}
 	sleep(5);
 
-	socket_server_exit(ss);																//退出srv
+	for(i=0;i<test_count;i++){
+		pdata = MALLOC(sizeof(str_data));													//发送的数据buf, 必须是malloc 分配的, 否则释放时会报错!! socket_server_poll() 解析data 完毕后会自动释放指针
+		memcpy(pdata, str_data, sizeof(str_data));
+		//socket_server_send(ss, id_pool[i], pdata, sizeof(str_data));					//高优先级发送data(需要使用id), 接收数据会在socket_server_poll() 的SOCKET_DATA 事件中
+		socket_server_send_lowpriority(ss, id_pool[i], pdata, sizeof(str_data));//低优先级发送data
+	}
+	sleep(5);
+
+	socket_server_exit(ss);																			//退出srv
 
 	pthread_join(pid, NULL); 
 }
@@ -66,7 +81,7 @@ int main(){
 	struct sigaction sa;
 	struct socket_server * ss;
 	sa.sa_handler = SIG_IGN;
-	sigaction(SIGPIPE, &sa, 0);														//忽略管道信号
+	sigaction(SIGPIPE, &sa, 0);																	//忽略管道信号
 
 	ss = socket_server_create();
 	test(ss);
@@ -74,3 +89,4 @@ int main(){
 
 	return 0;
 }
+
