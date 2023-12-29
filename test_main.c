@@ -40,7 +40,7 @@ static void *_poll(void * ud){
 const char* str_data = "hello adan_srv-v8";
 #define test_count (128)
 
-static void test(struct socket_server *ss){
+static void test(void){
 	pthread_t pid;
 	int c,l,b,i;
 	void * pdata;
@@ -89,7 +89,7 @@ int main(){
 	sa.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sa, 0);																	//忽略管道信号
 
-	test(ss);																										//这个原始test(), 只能测试API 的有效性, 并不能测试API 的使用方法, 因此, passed
+	test();																											//这个原始test(), 只能测试API 的有效性, 并不能测试API 的使用方法, 因此, passed
 
 	return 0;
 }
