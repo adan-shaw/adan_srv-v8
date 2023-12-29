@@ -44,7 +44,11 @@ static void test(struct socket_server *ss){
 	pthread_t pid;
 	int c,l,b,i;
 	void * pdata;
+	struct socket_server * ss;
 	int id_pool[test_count];
+
+	ss = socket_server_create();
+	
 	pthread_create(&pid, NULL, _poll, ss);											//创建新线程for srv io_event (仅只处理io事件, 为做任何收发io 操作)
 
 	c = socket_server_connect(ss,100,"127.0.0.1",80);						//connect 非阻塞test
@@ -59,7 +63,7 @@ static void test(struct socket_server *ss){
 	printf("binding stdin %d\n",b);
 
 	for(i=0;i<test_count;i++){
-		id_pool[i] = socket_server_connect(ss, 400+i, "127.0.0.1", 8888);	//成功返回id, id 不等于sfd, 但可以在管理pool 中找到结构体
+		id_pool[i] = socket_server_connect(ss, 400+i, "127.0.0.1", 8888);				//成功返回id, id 不等于sfd, 但可以在管理pool 中找到结构体
 		printf("socket_server_connect(): return value = %d, second_parameter = %d\n", id_pool[i], 400+i);//for test only
 	}
 	sleep(5);
@@ -74,18 +78,18 @@ static void test(struct socket_server *ss){
 
 	socket_server_exit(ss);																			//退出srv
 
-	pthread_join(pid, NULL); 
+	pthread_join(pid, NULL);
+
+	socket_server_release(ss);
 }
 
 int main(){
 	struct sigaction sa;
-	struct socket_server * ss;
+	
 	sa.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sa, 0);																	//忽略管道信号
 
-	ss = socket_server_create();
-	test(ss);
-	socket_server_release(ss);
+	test(ss);																										//这个原始test(), 只能测试API 的有效性, 并不能测试API 的使用方法, 因此, passed
 
 	return 0;
 }
