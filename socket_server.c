@@ -215,7 +215,7 @@ static int open_socket(struct socket_server *ss, struct request_open * request, 
 	result->data = NULL;
 
 	sprintf(port, "%d", request->port);
-	memset(&ai_hints, 0, sizeof(ai_hints));
+	//memset(&ai_hints, 0, sizeof(ai_hints));
 	ai_hints.ai_family = AF_UNSPEC;
 	ai_hints.ai_socktype = SOCK_STREAM;
 	ai_hints.ai_protocol = IPPROTO_TCP;
@@ -315,13 +315,13 @@ static socklen_t udp_socket_address(struct socket *s, const uint8_t udp_address[
 	memcpy(&port, udp_address+1, sizeof(uint16_t));
 	switch(s->protocol){
 	case PROTOCOL_UDP:
-		memset(&sa->v4, 0, sizeof(sa->v4));
+		//memset(&sa->v4, 0, sizeof(sa->v4));
 		sa->s.sa_family = AF_INET;
 		sa->v4.sin_port = port;
 		memcpy(&sa->v4.sin_addr, udp_address + 1 + sizeof(uint16_t), sizeof(sa->v4.sin_addr));	// ipv4 address is 32 bits
 		return sizeof(sa->v4);
 	case PROTOCOL_UDPv6:
-		memset(&sa->v6, 0, sizeof(sa->v6));
+		//memset(&sa->v6, 0, sizeof(sa->v6));
 		sa->s.sa_family = AF_INET6;
 		sa->v6.sin6_port = port;
 		memcpy(&sa->v6.sin6_addr, udp_address + 1 + sizeof(uint16_t), sizeof(sa->v6.sin6_addr)); // ipv6 address is 128 bits
@@ -1170,7 +1170,7 @@ static int do_bind(const char *host, int port, int protocol, int *family){
 		host = str_host;	// INADDR_ANY
 	}
 	sprintf(portstr, "%d", port);
-	memset(&ai_hints, 0, sizeof(ai_hints));
+	//memset(&ai_hints, 0, sizeof(ai_hints));
 	ai_hints.ai_family = AF_UNSPEC;
 	if(protocol == IPPROTO_TCP){
 		ai_hints.ai_socktype = SOCK_STREAM;
@@ -1346,7 +1346,7 @@ int socket_server_udp_connect(struct socket_server *ss, int id, const char * add
 	char portstr[16];
 	struct request_package request;
 	sprintf(portstr, "%d", port);
-	memset(&ai_hints, 0, sizeof(ai_hints));
+	//memset(&ai_hints, 0, sizeof(ai_hints));
 	ai_hints.ai_family = AF_UNSPEC;
 	ai_hints.ai_socktype = SOCK_DGRAM;
 	ai_hints.ai_protocol = IPPROTO_UDP;
