@@ -1,2 +1,6 @@
 test_main
 debug
+.vscode
+*.so
+*.o
+*.a
