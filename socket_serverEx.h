@@ -26,11 +26,11 @@
 #define SOCKET_UDP (6)
 
 #ifdef SOCKET_SERVER_FILE_MEMAPI
-#   define  STRINIFY_(S)    #S
-#   define  STRINIFY(S)     STRINIFY_(S)
-#   include STRINIFY(SOCKET_SERVER_FILE_MEMAPI)
-#   undef   STRINIFY
-#   undef   STRINIFY_
+#define  STRINIFY_(S)    #S
+#define  STRINIFY(S)     STRINIFY_(S)
+#include STRINIFY(SOCKET_SERVER_FILE_MEMAPI)
+#undef   STRINIFY
+#undef   STRINIFY_
 #endif
 
 #define MAX_INFO (128)
@@ -59,14 +59,13 @@
 #define PROTOCOL_UDP (1)
 #define PROTOCOL_UDPv6 (2)
 
-#define UDP_ADDRESS_SIZE (19)	// ipv6 128bit + port 16bit + 1 byte type
+#define UDP_ADDRESS_SIZE (19)		// ipv6 128bit + port 16bit + 1 byte type
 
 #define MAX_UDP_PACKAGE (65535)
 
-
-
-struct write_buffer {
-	struct write_buffer * next;
+struct write_buffer
+{
+	struct write_buffer *next;
 	void *buffer;
 	char *ptr;
 	int sz;
@@ -77,12 +76,14 @@ struct write_buffer {
 #define SIZEOF_TCPBUFFER (offsetof(struct write_buffer, udp_address[0]))
 #define SIZEOF_UDPBUFFER (sizeof(struct write_buffer))
 
-struct wb_list {
-	struct write_buffer * head;
-	struct write_buffer * tail;
+struct wb_list
+{
+	struct write_buffer *head;
+	struct write_buffer *tail;
 };
 
-struct socket {
+struct socket
+{
 	uintptr_t opaque;
 	struct wb_list high;
 	struct wb_list low;
@@ -91,19 +92,22 @@ struct socket {
 	int id;
 	uint16_t protocol;
 	uint16_t type;
-	union {
+	union
+	{
 		int size;
 		uint8_t udp_address[UDP_ADDRESS_SIZE];
 	} p;
 };
 
-struct socket_object_interface {
-	void * (*buffer)(void *);
-	int (*size)(void *);
-	void (*free)(void *);
+struct socket_object_interface
+{
+	void *(*buffer) (void *);
+	int (*size) (void *);
+	void (*free) (void *);
 };
 
-struct socket_server {
+struct socket_server
+{
 	int recvctrl_fd;
 	int sendctrl_fd;
 	int checkctrl;
@@ -119,66 +123,77 @@ struct socket_server {
 	fd_set rfds;
 };
 
-struct socket_message {
+struct socket_message
+{
 	int id;
 	uintptr_t opaque;
-	int ud;	// for accept, ud is listen id ; for data, ud is size of data
-	char * data;
+	int ud;												// for accept, ud is listen id ; for data, ud is size of data
+	char *data;
 };
 
-struct request_open {
+struct request_open
+{
 	int id;
 	int port;
 	uintptr_t opaque;
 	char host[1];
 };
 
-struct request_send {
+struct request_send
+{
 	int id;
 	int sz;
-	char * buffer;
+	char *buffer;
 };
 
-struct request_send_udp {
+struct request_send_udp
+{
 	struct request_send send;
 	uint8_t address[UDP_ADDRESS_SIZE];
 };
 
-struct request_setudp {
+struct request_setudp
+{
 	int id;
 	uint8_t address[UDP_ADDRESS_SIZE];
 };
 
-struct request_close {
+struct request_close
+{
 	int id;
 	uintptr_t opaque;
 };
 
-struct request_listen {
+struct request_listen
+{
 	int id;
 	int fd;
 	uintptr_t opaque;
 	char host[1];
 };
 
-struct request_bind {
+struct request_bind
+{
 	int id;
 	int fd;
 	uintptr_t opaque;
 };
 
-struct request_start {
+struct request_start
+{
 	int id;
 	uintptr_t opaque;
 };
 
-struct request_setopt {
+struct request_setopt
+{
 	int id;
 	int what;
 	int value;
 };
 
-struct request_udp {
+struct request_udp
+{
 	int id;
 	int fd;
 	int family;
@@ -201,9 +216,11 @@ struct request_udp {
 	C set udp address
  */
 
-struct request_package {
-	uint8_t header[8];	// 6 bytes dummy
-	union {
+struct request_package
+{
+	uint8_t header[8];						// 6 bytes dummy
+	union
+	{
 		char buffer[256];
 		struct request_open open;
 		struct request_send send;
@@ -219,20 +236,19 @@ struct request_package {
 	uint8_t dummy[256];
 };
 
-union sockaddr_all {
+union sockaddr_all
+{
 	struct sockaddr s;
 	struct sockaddr_in v4;
 	struct sockaddr_in6 v6;
 };
 
-struct send_object {
-	void * buffer;
+struct send_object
+{
+	void *buffer;
 	int sz;
-	void (*free_func)(void *);
+	void (*free_func) (void *);
 };
-
-
-
 
 /*
 	// ctrl command only exist in local fd, so don't worry about endian.
